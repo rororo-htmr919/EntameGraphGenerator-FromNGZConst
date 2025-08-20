@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>エンタメグラフジェネレーター</title>
+<style>
+  body{font-family:"Zen Maru Gothic", sans-serif; display:flex; padding:20px; gap:30px;}
+  #formArea{width:300px;}
+  #items div{margin-bottom:5px;}
+  #graph{position:relative;width:400px;height:400px;}
+  #list{margin-top:20px;}
+  .colorBox{display:inline-block;width:14px;height:14px;margin-right:5px;}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500&display=swap">
+</head>
+<body>
+<div id="formArea">
+  <h3>入力フォーム</h3>
+  <input type="text" id="name" placeholder="要素名" />
+  <input type="number" id="rate" placeholder="割合(%)" />
+  <button id="add">追加</button>
+  <div id="items"></div>
+  <button id="draw">作成</button>
+</div>
+<div>
+  <canvas id="graph" width="400" height="400"></canvas>
+  <div id="list"></div>
+</div>
+<script>
+const colors=["#e5332a","#f47b20","#faa220","#a3d65e","#09b29e","#4fb0e7","#6e51a3","#8a3f8f","#e91e63","#795548"];
+let data=[];
+document.getElementById('add').onclick=()=>{
+  if(data.length>=10)return;
+  const n=document.getElementById('name').value;
+  const r=Number(document.getElementById('rate').value);
+  if(!n||!r) return;
+  data.push({name:n,rate:r});
+  const div=document.createElement('div');
+  div.textContent=`${n} : ${r}%`;
+  document.getElementById('items').appendChild(div);
+  document.getElementById('name').value="";
+  document.getElementById('rate').value="";
+};
+document.getElementById('draw').onclick=()=>{
+  const sorted=data.sort((a,b)=>b.rate-a.rate);
+  const ctx=document.getElementById('graph').getContext('2d');
+  ctx.clearRect(0,0,400,400);
+  let start= -Math.PI/2;
+  document.getElementById('list').innerHTML="";
+  sorted.forEach((item,i)=>{
+    const angle= item.rate/100 * 2*Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(200,200);
+    ctx.fillStyle=colors[i];
+    ctx.arc(200,200,180,start,start+angle);
+    ctx.fill();
+    start += angle;
+    const li=document.createElement('div');
+    li.innerHTML=`<span class="colorBox" style="background:${colors[i]}"></span>${item.rate}% ${item.name}`;
+    document.getElementById('list').appendChild(li);
+  });
+};
+</script>
+  <button id="savePng">PNG保存</button>
+  <button id="tweet">Xで共有</button>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+document.getElementById('savePng').onclick=()=>{
+ html2canvas(document.body).then(canvas=>{
+   const a=document.createElement('a');a.download='graph.png';a.href=canvas.toDataURL();a.click();
+ });
+};
+document.getElementById('tweet').onclick=()=>{
+ html2canvas(document.body).then(canvas=>{
+   canvas.toBlob(blob=>{
+     const url=URL.createObjectURL(blob);
+     const text=encodeURIComponent('人生のエンタメグラフ\n#乃木坂工事中');
+     const intent=`https://twitter.com/intent/post?text=${text}`;
+     window.open(intent,'_blank');
+   });
+ });
+};
+</script>
+</body>
+</html>
