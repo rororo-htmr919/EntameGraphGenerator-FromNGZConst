@@ -2,16 +2,67 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>エンタメグラフジェネレーター</title>
 <style>
-  body{font-family:"Zen Maru Gothic", sans-serif; display:flex; padding:20px; gap:30px;}
-  #formArea{width:300px;}
-  #items div{margin-bottom:5px;}
-  #graph{position:relative;width:400px;height:400px;}
-  #list{margin-top:20px;}
-  .colorBox{display:inline-block;width:14px;height:14px;margin-right:5px;}
+  body {
+    font-family: "Zen Maru Gothic", sans-serif;
+    margin: 0;
+    padding: 10px;
+    background: #fdfcf9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #formArea {
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 20px;
+  }
+  input, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
+  #items div {
+    margin-bottom: 5px;
+    font-size: 0.9em;
+  }
+  #graphArea {
+    background: #fff;
+    border: 4px solid #333;
+    padding: 15px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 420px;
+  }
+  #titleText {
+    font-size: 1.4em;
+    margin-bottom: 10px;
+    white-space: pre-line;
+  }
+  #graph {
+    width: 100%;
+    height: auto;
+  }
+  #list {
+    margin-top: 15px;
+    text-align: left;
+  }
+  .colorBox {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 5px;
+  }
+  #buttonGroup button {
+    margin-top: 10px;
+  }
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 <div id="formArea">
@@ -22,9 +73,14 @@
   <div id="items"></div>
   <button id="draw">作成</button>
 </div>
-<div>
-  <canvas id="graph" width="400" height="400"></canvas>
+<div id="graphArea">
+  <div id="titleText">人生のエンタメグラフ\n#乃木坂工事中</div>
+  <canvas id="graph" width="300" height="300"></canvas>
   <div id="list"></div>
+</div>
+<div id="buttonGroup">
+  <button id="savePng">PNG保存</button>
+  <button id="tweet">Xで共有</button>
 </div>
 <script>
 const colors=["#e5332a","#f47b20","#faa220","#a3d65e","#09b29e","#4fb0e7","#6e51a3","#8a3f8f","#e91e63","#795548"];
@@ -44,15 +100,15 @@ document.getElementById('add').onclick=()=>{
 document.getElementById('draw').onclick=()=>{
   const sorted=data.sort((a,b)=>b.rate-a.rate);
   const ctx=document.getElementById('graph').getContext('2d');
-  ctx.clearRect(0,0,400,400);
+  ctx.clearRect(0,0,300,300);
   let start= -Math.PI/2;
   document.getElementById('list').innerHTML="";
   sorted.forEach((item,i)=>{
     const angle= item.rate/100 * 2*Math.PI;
     ctx.beginPath();
-    ctx.moveTo(200,200);
+    ctx.moveTo(150,150);
     ctx.fillStyle=colors[i];
-    ctx.arc(200,200,180,start,start+angle);
+    ctx.arc(150,150,130,start,start+angle);
     ctx.fill();
     start += angle;
     const li=document.createElement('div');
@@ -60,18 +116,16 @@ document.getElementById('draw').onclick=()=>{
     document.getElementById('list').appendChild(li);
   });
 };
-</script>
-  <button id="savePng">PNG保存</button>
-  <button id="tweet">Xで共有</button>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script>
 document.getElementById('savePng').onclick=()=>{
- html2canvas(document.body).then(canvas=>{
-   const a=document.createElement('a');a.download='graph.png';a.href=canvas.toDataURL();a.click();
+ html2canvas(document.getElementById('graphArea')).then(canvas=>{
+   const a=document.createElement('a');
+   a.download='graph.png';
+   a.href=canvas.toDataURL();
+   a.click();
  });
 };
 document.getElementById('tweet').onclick=()=>{
- html2canvas(document.body).then(canvas=>{
+ html2canvas(document.getElementById('graphArea')).then(canvas=>{
    canvas.toBlob(blob=>{
      const url=URL.createObjectURL(blob);
      const text=encodeURIComponent('人生のエンタメグラフ\n#乃木坂工事中');
